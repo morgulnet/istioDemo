@@ -1,0 +1,33 @@
+replicaCount: 12
+
+image:
+  repository: m0rgulnet/web
+  pullPolicy: IfNotPresent
+
+service:
+ internalPort: 8001
+ NodePort: 32222
+
+answertext: v22
+httpcode: 200
+index: homework.html
+
+serviceAccount:
+    create: true
+    name:
+
+resources:
+   limits:
+     cpu: 1000m
+     memory: 500Mi
+   requests:
+     cpu: 500m
+     memory: 250Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+imagePullSecrets: []

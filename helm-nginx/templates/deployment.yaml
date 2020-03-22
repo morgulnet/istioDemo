@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-with-configmaps-{{ .Values.answertext }}
+  labels:
+    app: nginx-with-configmaps
+    version: {{ .Values.answertext }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: nginx-with-configmaps
+      version: {{ .Values.answertext }}
+  template:
+    metadata:
+      labels:
+        app: nginx-with-configmaps
+        version: {{ .Values.answertext }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/app-conf.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: nginx-with-configmaps
+        image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
+        resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+          - name: app-dir-config-{{ .Values.answertext }}
+            mountPath: /app
+          - name: app-conf-{{ .Values.answertext }}
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+      volumes:
+        - name: app-dir-config-{{ .Values.answertext }}
+          configMap:
+            name: app-dir-config-{{ .Values.answertext }}
+        - name: app-conf-{{ .Values.answertext }}
+          configMap:
+            name: app-conf-{{ .Values.answertext }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

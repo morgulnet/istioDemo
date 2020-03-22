@@ -1,0 +1,148 @@
+---
+# Source: nginx-with-configmap/templates/app-conf.yaml
+apiVersion: v1
+data:
+  default.conf: |+
+    server {
+        listen       8001;
+        server_name  localhost;
+
+        location / {
+            root   /app;
+            index  homework.html;
+        }
+        location /homework.html {
+            root   /app;
+            index  homework.html;
+        }
+        location /check/ {
+            return 200;
+        }
+    }
+
+kind: ConfigMap
+metadata:
+  name: app-conf
+---
+# Source: nginx-with-configmap/templates/configmap.yaml
+apiVersion: v1
+data:
+  homework.html: |
+    <!doctype html>
+    <html>
+      <head>
+        <title>This is the title of the webpage!</title>
+      </head>
+      <body>
+        <p>  TEST CONFIG MAP  <strong> v2.2 </strong> </p>
+      </body>
+    </html>
+kind: ConfigMap
+metadata:
+  name: app-dir-config
+---
+# Source: nginx-with-configmap/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-with-configmaps
+  labels:
+    app: nginx-with-configmaps
+spec:
+  ports:
+  - port: 8001
+    name: http
+  selector:
+    app: nginx-with-configmaps
+---
+# Source: nginx-with-configmap/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-with-configmaps
+  labels:
+    app: nginx-with-configmaps
+spec:
+  replicas: 16
+  selector:
+    matchLabels:
+      app: nginx-with-configmaps
+  template:
+    metadata:
+      labels:
+        app: nginx-with-configmaps
+        version: v2.2
+      annotations:
+        checksum/config: d12d2fcf9bc614df24856bb996797468d620acf39ca6554368b39aab0182ad0b
+    spec:
+      containers:
+      - name: nginx-with-configmaps
+        image: "m0rgulnet/web:3"
+        ports:
+        - name: http
+          containerPort: 8001
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+            limits:
+              cpu: 300m
+              memory: 150Mi
+            requests:
+              cpu: 200m
+              memory: 100Mi
+        volumeMounts:
+          - name: app-dir-config
+            mountPath: /app
+          - name: app-conf
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+      volumes:
+        - name: app-dir-config
+          configMap:
+            name: app-dir-config
+        - name: app-conf
+          configMap:
+            name: app-conf
+---
+# Source: nginx-with-configmap/templates/gateway.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+# Source: nginx-with-configmap/templates/virtualservice.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nginx-with-configmaps
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: nginx-with-configmaps
+        port:
+          number: 8001

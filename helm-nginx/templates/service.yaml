@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-with-configmaps-{{ .Values.answertext }}
+  labels:
+    app: nginx-with-configmaps
+spec:
+  ports:
+  - port: {{ .Values.service.internalPort }}
+    name: http
+  selector:
+    version: {{ .Values.answertext }}

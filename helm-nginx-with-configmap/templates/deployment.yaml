@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-with-configmaps
+  labels:
+    app: nginx-with-configmaps
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: nginx-with-configmaps
+  template:
+    metadata:
+      labels:
+        app: nginx-with-configmaps
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      containers:
+      - name: nginx-with-configmaps
+        image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.internalPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        volumeMounts:
+          - name: app-dir-config
+            mountPath: /app
+          - name: app-conf
+            mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+      volumes:
+        - name: app-dir-config
+          configMap:
+            name: app-dir-config
+        - name: app-conf
+          configMap:
+            name: app-conf
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  default.conf: |+
+    server {
+        listen       {{ .Values.service.internalPort }};
+        server_name  localhost;
+
+        location / {
+            root   /app;
+            index  {{ .Values.index }};
+        }
+        location /check/ {
+            return {{ .Values.httpcode }};
+        }
+    }
+
+kind: ConfigMap
+metadata:
+  name: app-conf-{{ .Values.answertext }}

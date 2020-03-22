@@ -1,0 +1,23 @@
+apiVersion: v1
+data:
+  default.conf: |+
+    server {
+        listen       {{ .Values.service.internalPort }};
+        server_name  localhost;
+
+        location / {
+            root   /app;
+            index  homework.html;
+        }
+        location /homework.html {
+            root   /app;
+            index  homework.html;
+        }
+        location /check/ {
+            return 200;
+        }
+    }
+
+kind: ConfigMap
+metadata:
+  name: app-conf

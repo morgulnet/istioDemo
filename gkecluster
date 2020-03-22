@@ -1,0 +1,6 @@
+gcloud container clusters create \                                                                                              at ⎈ standart-cluster-1 at 15:37:14
+  --machine-type n1-standard-2 \
+  --num-nodes 4 \
+  --zone europe-west4-a \
+  --cluster-version latest \
+  standart-cluster-1
