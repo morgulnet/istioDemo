@@ -4,9 +4,11 @@
 
 # Download Istio
 WORKDIR="`pwd`"
-ISTIO_VERSION="${ISTIO_VERSION:-1.5.0}"
-log "Downloading Istio ${ISTIO_VERSION}..."
+ISTIO_VERSION="${ISTIO_VERSION:-1.5.1}"
+echo "Downloading Istio ${ISTIO_VERSION}..."
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
+
+export PATH="$PATH:/${WORKDIR}/istio-${ISTIO_VERSION}/bin"
 
 # Am I ready for install?
 istioctl verify-install
@@ -17,9 +19,6 @@ kubectl create namespace istio-system
 kubectl create clusterrolebinding cluster-admin-binding \
     --clusterrole=cluster-admin \
     --user=$(gcloud config get-value core/account)
-
-# Generate install manifest
-alias istioctl=${WORKDIR}/istio-${ISTIO_VERSION}/bin/istioctl
 
 istioctl manifest apply \
 --set values.grafana.enabled=true \
