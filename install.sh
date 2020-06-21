@@ -4,7 +4,7 @@
 
 # Download Istio
 WORKDIR="`pwd`"
-ISTIO_VERSION="${ISTIO_VERSION:-1.5.1}"
+ISTIO_VERSION="${ISTIO_VERSION:-1.6.0}"
 echo "Downloading Istio ${ISTIO_VERSION}..."
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
 
@@ -30,8 +30,8 @@ istioctl manifest apply \
 
 # Deploy app
 kubectl label namespace default istio-injection=enabled
-kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/istio-manifests.yaml
-kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/kubernetes-manifests.yaml
-kubectl delete serviceentry whitelist-egress-google-metadata
-kubectl delete serviceentry whitelist-egress-googleapis
-kubectl delete svc frontend-external
+#kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/istio-manifests.yaml
+#kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/master/release/kubernetes-manifests.yaml
+#kubectl delete serviceentry whitelist-egress-google-metadata
+#kubectl delete serviceentry whitelist-egress-googleapis
+#kubectl delete svc frontend-external

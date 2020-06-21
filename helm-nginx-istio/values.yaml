@@ -6,7 +6,7 @@ image:
 
 service:
  internalPort: 8001
- NodePort: 31116
+ NodePort: 32222
 
 answertext: v2.2
 
