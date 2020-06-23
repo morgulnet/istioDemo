@@ -4,7 +4,7 @@
 
 # Download Istio
 WORKDIR="`pwd`"
-ISTIO_VERSION="${ISTIO_VERSION:-1.6.0}"
+ISTIO_VERSION="${ISTIO_VERSION:-1.6.3}"
 echo "Downloading Istio ${ISTIO_VERSION}..."
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
 
